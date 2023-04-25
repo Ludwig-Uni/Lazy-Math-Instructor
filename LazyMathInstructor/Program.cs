@@ -148,22 +148,13 @@
         }
 
         /// <summary>
-        /// Constructs an empty term.
-        /// </summary>
-        private Term()
-        {
-            Coefficients = new Dictionary<VariableCombination, int>();
-        }
-
-        /// <summary>
         /// Constructs a term representing an integer constant.
         /// </summary>
-        private Term(int constant)
+        private Term(int constant = 0)
         {
-            Coefficients = new Dictionary<VariableCombination, int>()
-            {
-                { new VariableCombination(), constant }
-            };
+            Coefficients = new Dictionary<VariableCombination, int>();
+            if (constant != 0)
+                Coefficients.Add(new VariableCombination(), constant);
         }
 
         /// <summary>
