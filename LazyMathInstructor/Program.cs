@@ -96,6 +96,26 @@
                 && Exponents.Count == other.Exponents.Count
                 && !Exponents.Except(other.Exponents).Any();
         }
+
+        /// <summary>
+        /// Pretty-Printing for debugging purposes / verbose output.
+        /// </summary>
+        public override string ToString()
+        {
+            string result = "";
+            foreach (var varTerm in Exponents.OrderBy(x => x.Key))
+            {
+                var exponent = varTerm.Value switch
+                {
+                    1 => "",
+                    < 10 => $"^{varTerm.Value}",
+                    _ => $"^({varTerm.Value})",
+                };
+
+                result += varTerm.Key.ToString().ToLower() + exponent;
+            }
+            return result;
+        }
     }
 
     /// <summary>
@@ -308,6 +328,15 @@
                 && Coefficients.Count == other.Coefficients.Count
                 && !Coefficients.Except(other.Coefficients).Any();
         }
+
+        /// <summary>
+        /// Pretty-Printing for debugging purposes / verbose output.
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Join(" + ", Coefficients.Select(x => (x.Value == 1 ? "" : x.Value) 
+                                                                   + x.Key.ToString()));
+        }
     }
 
     internal class Program
@@ -335,13 +364,20 @@
         /// Entry point of the program. Reads input from STDIN and prints YES or NO for each pair of terms
         /// entered, depending on whether they are equivalent, according to the specification.
         /// </summary>
-        static void Main()
+        static void Main(string[] args)
         {
+            bool verbose = args.Contains("-v") || args.Contains("--verbose");
+
             var terms = GetInputTerms();
-            Console.WriteLine(string.Join("\n",
-                                          terms.Select(x => x.First.Equals(x.Second)
-                                                                ? "YES"
-                                                                : "NO")));
+            foreach (var (first, second) in terms)
+            {
+                Console.WriteLine(first.Equals(second) ? "YES" : "NO");
+                if (verbose)
+                {
+                    Console.WriteLine("First:  " + first.ToString());
+                    Console.WriteLine("Second: " + second.ToString());
+                }
+            }
         }
     }
 }
