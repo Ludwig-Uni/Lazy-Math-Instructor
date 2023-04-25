@@ -90,7 +90,7 @@
         /// the <see cref="VariableCombination"/>s are considered to be equal.
         /// This is needed to use and compare them, e.g. as a key in Dictionaries.
         /// </summary>
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return obj is VariableCombination other
                 && Exponents.Count == other.Exponents.Count
@@ -302,7 +302,7 @@
         /// the <see cref="Term"/>s are considered to be equal.
         /// This is needed to use and compare them (Term a is equivalent to Term b iff a.Equals(b)).
         /// </summary>
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return obj is Term other
                 && Coefficients.Count == other.Coefficients.Count
