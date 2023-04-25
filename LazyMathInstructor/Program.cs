@@ -1,20 +1,38 @@
 ﻿namespace LazyMathInstructor
 {
+    /// <summary>
+    /// Represents a variable a, b, ..., z of the term
+    /// </summary>
     public enum Variable : byte
     {
         A, B, C, D, E, F, G, H, I, J, K, L, M,
         N, O, P, Q, R, S, T, U, V, W, X, Y, Z
     }
 
+    /// <summary>
+    /// Represents a product of 0 or more variables, each with an exponent.
+    /// For example one <see cref="VariableCombination"/> would be "a^3 b^4 c"
+    /// </summary>
     public class VariableCombination
     {
+        /// <summary>
+        /// Maps all variables appearing in this variable combination to their respective exponents.
+        /// Variables with exponent 0 do not appear in the dictionary.
+        /// </summary>
         public Dictionary<Variable, int> Exponents { get; }
 
+        /// <summary>
+        /// Construct a <see cref="VariableCombination"/> with no variables.
+        /// </summary>
         public VariableCombination()
         {
             Exponents = new Dictionary<Variable, int>();
         }
 
+        /// <summary>
+        /// Construct a <see cref="VariableCombination"/> with one variable <paramref name="v"/>
+        /// that has an exponent of 1.
+        /// </summary>
         public VariableCombination(Variable v)
         {
             Exponents = new Dictionary<Variable, int>()
@@ -23,11 +41,20 @@
             };
         }
 
+        /// <summary>
+        /// Construct a <see cref="VariableCombination"/> that copies the exponents from the
+        /// existing dictionary <paramref name="exponents"/> (of another <see cref="VariableCombination"/>).
+        /// </summary>
         private VariableCombination(Dictionary<Variable, int> exponents)
         {
             Exponents = new Dictionary<Variable, int>(exponents);
         }
 
+        /// <summary>
+        /// Operator for multiplication of two variable combinations.
+        /// <paramref name="first"/> * <paramref name="second"/> is calculated by
+        /// adding the exponents of all variables in the combination (i.e. ab * b^2 = a b^3).
+        /// </summary>
         public static VariableCombination operator *(VariableCombination first, VariableCombination second)
         {
             var result = new VariableCombination(first.Exponents);
@@ -46,6 +73,10 @@
             return result;
         }
 
+        /// <summary>
+        /// Overloaded method to get hash code based solely on the content of the <see cref="Exponents"/>,
+        /// since two <see cref="VariableCombination"/>s with matching <see cref="Exponents"/> are considered equal.
+        /// </summary>
         public override int GetHashCode()
         {
             unchecked // FIXME TODO improve this
@@ -54,6 +85,12 @@
             }
         }
 
+        /// <summary>
+        /// Overloaded equality check based solely on the content of the <see cref="Exponents"/>.
+        /// If all entries in the <see cref="Exponents"/> dictionary match, 
+        /// the <see cref="VariableCombination"/>s are considered to be equal.
+        /// This is needed to use and compare them, e.g. as a key in Dictionaries.
+        /// </summary>
         public override bool Equals(object? obj)
         {
             return obj is VariableCombination other
@@ -62,15 +99,31 @@
         }
     }
 
+    /// <summary>
+    /// Represents a (normalized) term which can be compared to another term to check for equivalence.
+    /// </summary>
     public class Term
     {
+        /// <summary>
+        /// Maps all <see cref="VariableCombination"/>s in this term to their coefficients
+        /// (that is, the constant factor). Two terms are equivalent iff their <see cref="Coefficients"/> match.
+        /// </summary>
         private Dictionary<VariableCombination, int> Coefficients { get; }
 
+        /// <summary>
+        /// Parse the character <paramref name="c"/> between 'a' and 'z' to its
+        /// representation as a <see cref="Variable"/>.
+        /// </summary>
         private static Variable ParseVariable(char c)
         {
             return Enum.Parse<Variable>(c.ToString().ToUpper());
         }
 
+        /// <summary>
+        /// For the string <paramref name="s"/> ending with a ')' character, finds
+        /// the index in the string where the *corresponding* '(' character is.
+        /// </summary>
+        /// <exception cref="ArgumentException">If <paramref name="s"/> doesn't contain a corresponding '('</exception>
         private static int FindMatchingOpeningBracket(string s)
         {
             // s[^1] == ')', we need to find the matching '('.
@@ -91,14 +144,20 @@
             }
 
             // This will not happen if the input is well-formatted.
-            throw new Exception("Malformed term: No matching closing bracket found");
+            throw new ArgumentException("Malformed term: No matching closing bracket found", nameof(s));
         }
 
+        /// <summary>
+        /// Constructs an empty term.
+        /// </summary>
         private Term()
         {
             Coefficients = new Dictionary<VariableCombination, int>();
         }
 
+        /// <summary>
+        /// Constructs a term representing an integer constant.
+        /// </summary>
         private Term(int constant)
         {
             Coefficients = new Dictionary<VariableCombination, int>()
@@ -107,6 +166,9 @@
             };
         }
 
+        /// <summary>
+        /// Constructs a term representing a single variable (with exponent 1).
+        /// </summary>
         private Term(Variable variable)
         {
             Coefficients = new Dictionary<VariableCombination, int>()
@@ -115,6 +177,12 @@
             };
         }
 
+        /// <summary>
+        /// Parses the string <paramref name="s"/> to a normalized term that can be compared to other terms.
+        /// Parsing is done recursively for sub-terms in brackets, and terms are added/subtracted/multiplied
+        /// left-to-right. This is done by parsing the last term and recursively parsing all terms before that.
+        /// </summary>
+        /// <exception cref="ArgumentException">If two sub-terms are not connected by a valid binary operator</exception>
         public static Term Parse(string s)
         {
             Term lastTerm;
@@ -157,10 +225,13 @@
                 '+' => Term.Parse(s[..(restIndex - 1)]) + lastTerm,
                 '-' => Term.Parse(s[..(restIndex - 1)]) - lastTerm,
                 '*' => Term.Parse(s[..(restIndex - 1)]) * lastTerm,
-                _ => throw new Exception("Malformed term: expected operator after sub-term"),
+                _ => throw new ArgumentException("Malformed term: expected operator after sub-term", nameof(s)),
             };
         }
 
+        /// <summary>
+        /// Operator for addition of two terms. The coefficients of matching variable combinations are added.
+        /// </summary>
         public static Term operator +(Term first, Term second)
         {
             var result = new Term();
@@ -176,6 +247,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Operator for subtraction of two terms. The coefficients of matching variable combinations are subtracted.
+        /// </summary>
         public static Term operator -(Term first, Term second)
         {
             var result = new Term();
@@ -191,6 +265,10 @@
             return result;
         }
 
+        /// <summary>
+        /// Operator for multiplication of two terms. All variable combinations and corresponding coefficients are
+        /// multiplied pairwise (i.e. (4a + 3b) * 2c = 8ac + 6bc)
+        /// </summary>
         public static Term operator *(Term first, Term second)
         {
             var result = new Term();
@@ -216,6 +294,10 @@
             return result;
         }
 
+        /// <summary>
+        /// Overloaded method to get hash code based solely on the content of the <see cref="Coefficients"/>,
+        /// since two <see cref="Term"/>s with matching <see cref="Coefficients"/> are considered equal.
+        /// </summary>
         public override int GetHashCode()
         {
             unchecked // FIXME TODO improve this
@@ -224,6 +306,12 @@
             }
         }
 
+        /// <summary>
+        /// Overloaded equality check based solely on the content of the <see cref="Coefficients"/>.
+        /// If all entries in the <see cref="Coefficients"/> dictionary match, 
+        /// the <see cref="Term"/>s are considered to be equal.
+        /// This is needed to use and compare them (Term a is equivalent to Term b iff a.Equals(b)).
+        /// </summary>
         public override bool Equals(object? obj)
         {
             return obj is Term other
@@ -234,6 +322,10 @@
 
     internal class Program
     {
+        /// <summary>
+        /// Reads the input from STDIN, parses the terms and returns them in a list of tuples
+        /// of two terms each, that are to be checked for equivalence.
+        /// </summary>
         static List<(Term First, Term Second)> GetInputTerms()
         {
             var terms = new List<(Term First, Term Second)>();
@@ -249,6 +341,10 @@
             return terms;
         }
 
+        /// <summary>
+        /// Entry point of the program. Reads input from STDIN and prints YES or NO for each pair of terms
+        /// entered, depending on whether they are equivalent, according to the specification.
+        /// </summary>
         static void Main()
         {
             var terms = GetInputTerms();
