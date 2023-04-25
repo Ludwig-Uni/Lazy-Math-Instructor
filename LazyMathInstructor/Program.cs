@@ -19,14 +19,14 @@
         /// Maps all variables appearing in this variable combination to their respective exponents.
         /// Variables with exponent 0 do not appear in the dictionary.
         /// </summary>
-        public Dictionary<Variable, int> Exponents { get; }
+        public Dictionary<Variable, uint> Exponents { get; }
 
         /// <summary>
         /// Construct a <see cref="VariableCombination"/> with no variables.
         /// </summary>
         public VariableCombination()
         {
-            Exponents = new Dictionary<Variable, int>();
+            Exponents = new Dictionary<Variable, uint>();
         }
 
         /// <summary>
@@ -35,7 +35,7 @@
         /// </summary>
         public VariableCombination(Variable v)
         {
-            Exponents = new Dictionary<Variable, int>()
+            Exponents = new Dictionary<Variable, uint>()
             {
                 { v, 1 }
             };
@@ -45,9 +45,9 @@
         /// Construct a <see cref="VariableCombination"/> that copies the exponents from the
         /// existing dictionary <paramref name="exponents"/> (of another <see cref="VariableCombination"/>).
         /// </summary>
-        private VariableCombination(Dictionary<Variable, int> exponents)
+        private VariableCombination(Dictionary<Variable, uint> exponents)
         {
-            Exponents = new Dictionary<Variable, int>(exponents);
+            Exponents = new Dictionary<Variable, uint>(exponents);
         }
 
         /// <summary>
@@ -63,11 +63,10 @@
                 if (result.Exponents.ContainsKey(x.Key))
                 {
                     result.Exponents[x.Key] += x.Value;
-                    if (result.Exponents[x.Key] == 0) result.Exponents.Remove(x.Key);
                 }
                 else
                 {
-                    if (x.Value != 0) result.Exponents.Add(x.Key, x.Value);
+                    result.Exponents.Add(x.Key, x.Value);
                 }
             }
             return result;
