@@ -13,20 +13,20 @@
     /// Represents a product of 0 or more variables, each with an exponent.
     /// For example one <see cref="VariableCombination"/> would be "a^3 b^4 c"
     /// </summary>
-    public class VariableCombination
+    public class VariableCombination : IComparable
     {
         /// <summary>
         /// Maps all variables appearing in this variable combination to their respective exponents.
         /// Variables with exponent 0 do not appear in the dictionary.
         /// </summary>
-        public Dictionary<Variable, uint> Exponents { get; }
+        public SortedDictionary<Variable, int> Exponents { get; }
 
         /// <summary>
         /// Construct a <see cref="VariableCombination"/> with no variables.
         /// </summary>
         public VariableCombination()
         {
-            Exponents = new Dictionary<Variable, uint>();
+            Exponents = new SortedDictionary<Variable, int>();
         }
 
         /// <summary>
@@ -35,7 +35,7 @@
         /// </summary>
         public VariableCombination(Variable v)
         {
-            Exponents = new Dictionary<Variable, uint>()
+            Exponents = new SortedDictionary<Variable, int>()
             {
                 { v, 1 }
             };
@@ -45,9 +45,9 @@
         /// Construct a <see cref="VariableCombination"/> that copies the exponents from the
         /// existing dictionary <paramref name="exponents"/> (of another <see cref="VariableCombination"/>).
         /// </summary>
-        private VariableCombination(Dictionary<Variable, uint> exponents)
+        private VariableCombination(SortedDictionary<Variable, int> exponents)
         {
-            Exponents = new Dictionary<Variable, uint>(exponents);
+            Exponents = new SortedDictionary<Variable, int>(exponents);
         }
 
         /// <summary>
@@ -78,10 +78,12 @@
         /// </summary>
         public override int GetHashCode()
         {
-            unchecked // FIXME TODO improve this
+            var hash = new HashCode();
+            foreach (var exponent in Exponents)
             {
-                return Exponents.Sum(x => x.Key.GetHashCode() * x.Value.GetHashCode());
+                hash.Add((exponent.Key, exponent.Value));
             }
+            return hash.ToHashCode();
         }
 
         /// <summary>
@@ -116,6 +118,22 @@
             }
             return result;
         }
+
+        public int CompareTo(object obj)
+        {
+            if (obj is not VariableCombination other) 
+                throw new ArgumentException("Can't compare variable combination to object of different type!");
+
+            for (Variable v = Variable.A; v <= Variable.Z; v++)
+            {
+                int thisExponent = Exponents.GetValueOrDefault(v);
+                int otherExponent = other.Exponents.GetValueOrDefault(v);
+                if (thisExponent != otherExponent)
+                    return otherExponent - thisExponent; // Greater exponent precedes smaller exponent in ordering
+            }
+
+            return 0;
+        }
     }
 
     /// <summary>
@@ -127,7 +145,7 @@
         /// Maps all <see cref="VariableCombination"/>s in this term to their coefficients
         /// (that is, the constant factor). Two terms are equivalent iff their <see cref="Coefficients"/> match.
         /// </summary>
-        private Dictionary<VariableCombination, int> Coefficients { get; }
+        private SortedDictionary<VariableCombination, int> Coefficients { get; }
 
         /// <summary>
         /// Parse the character <paramref name="c"/> between 'a' and 'z' to its
@@ -171,7 +189,7 @@
         /// </summary>
         private Term(int constant = 0)
         {
-            Coefficients = new Dictionary<VariableCombination, int>();
+            Coefficients = new SortedDictionary<VariableCombination, int>();
             if (constant != 0)
                 Coefficients.Add(new VariableCombination(), constant);
         }
@@ -181,7 +199,7 @@
         /// </summary>
         private Term(Variable variable)
         {
-            Coefficients = new Dictionary<VariableCombination, int>()
+            Coefficients = new SortedDictionary<VariableCombination, int>()
             {
                 { new VariableCombination(variable), 1 }
             };
@@ -310,10 +328,12 @@
         /// </summary>
         public override int GetHashCode()
         {
-            unchecked // FIXME TODO improve this
+            var hash = new HashCode();
+            foreach (var coefficient in Coefficients)
             {
-                return Coefficients.Sum(x => x.Key.GetHashCode() * x.Value.GetHashCode());
+                hash.Add((coefficient.Key, coefficient.Value));
             }
+            return hash.ToHashCode();
         }
 
         /// <summary>
