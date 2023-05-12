@@ -228,26 +228,29 @@
                 }
             }
 
-            if (integerStartsAt < s.Length)
+            if (integerStartsAt < s.Length) // The term ends with an integer constant, parse that
             {
                 lastTerm = new Term(int.Parse(s[integerStartsAt..]));
                 restIndex = integerStartsAt;
             }
-            else if (s[^1] == ')')
+            else if (s[^1] == ')') // The term ends with a sub-term in parentheses, parse that
             {
                 int openingBracketIndex = FindMatchingOpeningBracket(s);
                 lastTerm = Term.Parse(s[(openingBracketIndex + 1)..^1]);
                 restIndex = openingBracketIndex;
             }
-            else // We have a variable 'a' to 'z'
+            else // The term ends in a variable 'a' to 'z', parse that
             {
                 Variable variable = ParseVariable(s[^1]);
                 lastTerm = new Term(variable);
                 restIndex = s.Length - 1;
             }
 
-            if (restIndex <= 0) return lastTerm;
+            if (restIndex <= 0) // We finished parsing the entire term, there's nothing more to the left to parse
+                return lastTerm;
 
+
+            // Recursively parse the rest of the term to the left, *then* apply the correct operation between both subterms
             return s[restIndex - 1] switch
             {
                 '+' => Term.Parse(s[..(restIndex - 1)]) + lastTerm,
