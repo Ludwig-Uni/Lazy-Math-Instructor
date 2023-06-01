@@ -211,6 +211,35 @@
         }
 
         /// <summary>
+        /// Helper method: Output string <paramref name="s"/> to STDOUT with console color <paramref name="c"/>, 
+        /// restoring the original console color afterwards.
+        /// </summary>
+        private static void PrintColored(string s, ConsoleColor c)
+        {
+            ConsoleColor prevColor = Console.ForegroundColor;
+            Console.ForegroundColor = c;
+            Console.Write(s);
+            Console.ForegroundColor = prevColor;
+        }
+
+        /// <summary>
+        /// Helper method: Output information about a term calculation to STDOUT.
+        /// <paramref name="first"/> <paramref name="symbol"/> <paramref name="second"/> = <paramref name="result"/>,
+        /// where <paramref name="symbol"/> is the symbol (+, -, *) of the performed <paramref name="operation"/>.
+        /// </summary>
+        private static void PrintOperation(Term first, Term second, Term result, string operation, char symbol)
+        {
+            Console.Write(operation);
+            PrintColored("(", ConsoleColor.Red);
+            Console.Write(first.ToString());
+            PrintColored($") {symbol} (", ConsoleColor.Red);
+            Console.Write(second.ToString());
+            PrintColored(") = ", ConsoleColor.Red);
+            PrintColored(result.ToString(), ConsoleColor.Green);
+            Console.WriteLine();
+        }
+
+        /// <summary>
         /// Parses the string <paramref name="s"/> to a normalized term that can be compared to other terms.
         /// Parsing is done recursively for sub-terms in brackets, and terms are added/subtracted/multiplied
         /// left-to-right. This is done by parsing the last term and recursively parsing all terms before that.
@@ -255,12 +284,15 @@
                 return lastTerm;
 
 
+            Term leftTerm = Term.Parse(s[..(restIndex - 1)]);
+            char operation = s[restIndex - 1];
+
             // Recursively parse the rest of the term to the left, *then* apply the correct operation between both subterms
-            return s[restIndex - 1] switch
+            return operation switch
             {
-                '+' => Term.Parse(s[..(restIndex - 1)]) + lastTerm,
-                '-' => Term.Parse(s[..(restIndex - 1)]) - lastTerm,
-                '*' => Term.Parse(s[..(restIndex - 1)]) * lastTerm,
+                '+' => leftTerm + lastTerm,
+                '-' => leftTerm - lastTerm,
+                '*' => leftTerm * lastTerm,
                 _ => throw new ArgumentException("Malformed term: expected operator after sub-term", nameof(s)),
             };
         }
@@ -280,6 +312,9 @@
                     result.Coefficients.Add(varCombo, coefficient);
             }
 
+            if (Program.Verbose)
+                PrintOperation(first, second, result, "Add:  ", '+');
+
             return result;
         }
 
@@ -297,6 +332,9 @@
                 if (coefficient != 0)
                     result.Coefficients.Add(varCombo, coefficient);
             }
+
+            if (Program.Verbose)
+                PrintOperation(first, second, result, "Sub:  ", '-');
 
             return result;
         }
@@ -327,6 +365,10 @@
                     }
                 }
             }
+
+            if (Program.Verbose)
+                PrintOperation(first, second, result, "Mult: ", '*');
+
             return result;
         }
 
@@ -367,8 +409,14 @@
         }
     }
 
-    internal class Program
+    public class Program
     {
+        /// <summary>
+        /// Indicates if the program was started with the --verbose flag
+        /// and should output (intermediate) parsing results.
+        /// </summary>
+        public static bool Verbose { get; private set; }
+
         /// <summary>
         /// Reads the input from STDIN, parses the terms and returns them in a list of tuples
         /// of two terms each, that are to be checked for equivalence.
@@ -381,7 +429,9 @@
             for (int i = 0; i < n; i++)
             {
                 Term first = Term.Parse(Console.ReadLine()!.Replace(" ", "").Replace("\t", ""));
+                if (Program.Verbose) Console.WriteLine();
                 Term second = Term.Parse(Console.ReadLine()!.Replace(" ", "").Replace("\t", ""));
+                if (Program.Verbose) Console.WriteLine();
                 terms.Add((first, second));
             }
 
@@ -399,7 +449,7 @@
                 "Terminate each input with a newline.\n" +
                 "\n" +
                 "Options:\n" +
-                " -v, --verbose: Output parsed terms\n" +
+                " -v, --verbose: Output parsed terms step-by-step\n" +
                 " -h, --help:    Display this message");
         }
 
@@ -417,13 +467,13 @@
 
             Console.WriteLine("LazyMathInstructor by Ludwig Kolesch\nReading input from STDIN now.\n");
 
-            bool verbose = args.Contains("-v") || args.Contains("--verbose");
+            Verbose = args.Contains("-v") || args.Contains("--verbose");
 
             var terms = GetInputTerms();
             foreach (var (first, second) in terms)
             {
                 Console.WriteLine(first.Equals(second) ? "YES" : "NO");
-                if (verbose)
+                if (Verbose)
                 {
                     Console.WriteLine("First:  " + first.ToString());
                     Console.WriteLine("Second: " + second.ToString());
