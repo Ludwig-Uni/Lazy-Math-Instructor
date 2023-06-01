@@ -119,6 +119,11 @@
             return result;
         }
 
+        /// <summary>
+        /// Compares two <see cref="VariableCombination"/>s to establish an ordering. 
+        /// Earlier letters and higher exponents are ordered before later letters and smaller exponents:
+        /// a^3 < a^2 < ab < b^2 < c
+        /// </summary>
         public int CompareTo(object obj)
         {
             if (obj is not VariableCombination other) 
