@@ -254,9 +254,21 @@
         /// </summary>
         public override bool Equals(object obj)
         {
-            return obj is Term other
-                && Coefficients.Count == other.Coefficients.Count
-                && !Coefficients.Except(other.Coefficients).Any();
+            if (obj is not Term other) return false;
+            if (this.Coefficients.Count != other.Coefficients.Count) return false;
+
+            var thisEnum = this.Coefficients.GetEnumerator();
+            var otherEnum = other.Coefficients.GetEnumerator();
+
+            while (thisEnum.MoveNext())
+            {
+                otherEnum.MoveNext();
+
+                if (!thisEnum.Current.Key.Equals(otherEnum.Current.Key) || thisEnum.Current.Value != otherEnum.Current.Value)
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>

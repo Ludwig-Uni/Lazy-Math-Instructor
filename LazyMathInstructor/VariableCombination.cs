@@ -85,9 +85,21 @@
         /// </summary>
         public override bool Equals(object obj)
         {
-            return obj is VariableCombination other
-                && Exponents.Count == other.Exponents.Count
-                && !Exponents.Except(other.Exponents).Any();
+            if (obj is not VariableCombination other) return false;
+            if (this.Exponents.Count != other.Exponents.Count) return false;
+
+            var thisEnum = this.Exponents.GetEnumerator();
+            var otherEnum = other.Exponents.GetEnumerator();
+
+            while (thisEnum.MoveNext())
+            {
+                otherEnum.MoveNext();
+
+                if (thisEnum.Current.Key != otherEnum.Current.Key || thisEnum.Current.Value != otherEnum.Current.Value)
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
