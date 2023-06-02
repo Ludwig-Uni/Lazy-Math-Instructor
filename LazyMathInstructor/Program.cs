@@ -264,7 +264,8 @@
 
             if (integerStartsAt < s.Length) // The term ends with an integer constant, parse that
             {
-                lastTerm = new Term(int.Parse(s[integerStartsAt..]));
+                int integerConstant = int.Parse(s[integerStartsAt..]);
+                lastTerm = new Term(integerConstant);
                 restIndex = integerStartsAt;
             }
             else if (s[^1] == ')') // The term ends with a sub-term in parentheses, parse that
