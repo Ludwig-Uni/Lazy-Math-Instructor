@@ -61,6 +61,7 @@
             Verbose = args.Contains("-v") || args.Contains("--verbose");
 
             var polynomials = ParseInputTerms();
+            Console.WriteLine();
             foreach (var (first, second) in polynomials)
             {
                 Console.WriteLine(first.Equals(second) ? "YES" : "NO");
