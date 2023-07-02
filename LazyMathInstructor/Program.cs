@@ -10,23 +10,23 @@
 
         /// <summary>
         /// Reads the input from STDIN, parses the terms and returns them in a list of tuples
-        /// of two terms each, that are to be checked for equivalence.
+        /// of two polynomials each, that are to be checked for equivalence.
         /// </summary>
-        static List<(Term First, Term Second)> GetInputTerms()
+        static List<(Polynomial First, Polynomial Second)> ParseInputTerms()
         {
-            var terms = new List<(Term First, Term Second)>();
+            var polynomials = new List<(Polynomial First, Polynomial Second)>();
 
             int n = int.Parse(Console.ReadLine()!);
             for (int i = 0; i < n; i++)
             {
-                Term first = Term.Parse(Console.ReadLine()!.Replace(" ", "").Replace("\t", ""));
+                Polynomial first = Polynomial.Parse(Console.ReadLine()!.Replace(" ", "").Replace("\t", ""));
                 if (Program.Verbose) Console.WriteLine();
-                Term second = Term.Parse(Console.ReadLine()!.Replace(" ", "").Replace("\t", ""));
+                Polynomial second = Polynomial.Parse(Console.ReadLine()!.Replace(" ", "").Replace("\t", ""));
                 if (Program.Verbose) Console.WriteLine();
-                terms.Add((first, second));
+                polynomials.Add((first, second));
             }
 
-            return terms;
+            return polynomials;
         }
 
         /// <summary>
@@ -40,7 +40,7 @@
                 "Terminate each input with a newline.\n" +
                 "\n" +
                 "Options:\n" +
-                " -v, --verbose: Output parsed terms step-by-step\n" +
+                " -v, --verbose: Output parsed polynomials step-by-step\n" +
                 " -h, --help:    Display this message");
         }
 
@@ -60,8 +60,8 @@
 
             Verbose = args.Contains("-v") || args.Contains("--verbose");
 
-            var terms = GetInputTerms();
-            foreach (var (first, second) in terms)
+            var polynomials = ParseInputTerms();
+            foreach (var (first, second) in polynomials)
             {
                 Console.WriteLine(first.Equals(second) ? "YES" : "NO");
                 if (Verbose)

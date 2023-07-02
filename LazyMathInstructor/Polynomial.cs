@@ -1,13 +1,13 @@
 ﻿namespace LazyMathInstructor
 {
     /// <summary>
-    /// Represents a (normalized) term which can be compared to another term to check for equivalence.
+    /// Represents a polynomial which can be compared to another polynomial to check for equivalence.
     /// </summary>
-    public class Term
+    public class Polynomial
     {
         /// <summary>
-        /// Maps all <see cref="VariableCombination"/>s in this term to their coefficients
-        /// (that is, the constant factor). Two terms are equivalent iff their <see cref="Coefficients"/> match.
+        /// Maps all <see cref="VariableCombination"/>s in this polynomial to their coefficients
+        /// (that is, the constant factor). Two polynomials are equivalent iff their <see cref="Coefficients"/> match.
         /// </summary>
         private SortedDictionary<VariableCombination, int> Coefficients { get; }
 
@@ -49,9 +49,9 @@
         }
 
         /// <summary>
-        /// Constructs a term representing an integer constant.
+        /// Constructs a polynomial representing an integer constant.
         /// </summary>
-        private Term(int constant = 0)
+        private Polynomial(int constant = 0)
         {
             Coefficients = new SortedDictionary<VariableCombination, int>();
             if (constant != 0)
@@ -59,9 +59,9 @@
         }
 
         /// <summary>
-        /// Constructs a term representing a single variable (with exponent 1).
+        /// Constructs a polynomial representing a single variable (with exponent 1).
         /// </summary>
-        private Term(Variable variable)
+        private Polynomial(Variable variable)
         {
             Coefficients = new SortedDictionary<VariableCombination, int>()
             {
@@ -82,11 +82,11 @@
         }
 
         /// <summary>
-        /// Helper method: Output information about a term calculation to STDOUT.
+        /// Helper method: Output information about a polynomial calculation to STDOUT.
         /// <paramref name="first"/> <paramref name="symbol"/> <paramref name="second"/> = <paramref name="result"/>,
         /// where <paramref name="symbol"/> is the symbol (+, -, *) of the performed <paramref name="operation"/>.
         /// </summary>
-        private static void PrintOperation(Term first, Term second, Term result, string operation, char symbol)
+        private static void PrintOperation(Polynomial first, Polynomial second, Polynomial result, string operation, char symbol)
         {
             Console.Write(operation);
             PrintColored("(", ConsoleColor.Red);
@@ -99,14 +99,14 @@
         }
 
         /// <summary>
-        /// Parses the string <paramref name="s"/> to a normalized term that can be compared to other terms.
+        /// Parses the term <paramref name="s"/> to a normalized polynomial that can be compared to other polynomials.
         /// Parsing is done recursively for sub-terms in brackets, and terms are added/subtracted/multiplied
         /// left-to-right. This is done by parsing the last term and recursively parsing all terms before that.
         /// </summary>
         /// <exception cref="ArgumentException">If two sub-terms are not connected by a valid binary operator</exception>
-        public static Term Parse(string s)
+        public static Polynomial Parse(string s)
         {
-            Term lastTerm;
+            Polynomial lastTerm;
             int restIndex;
 
             // If the string ends in an integer, first index of that integer, otherwise s.Length
@@ -124,19 +124,19 @@
             if (integerStartsAt < s.Length) // The term ends with an integer constant, parse that
             {
                 int integerConstant = int.Parse(s[integerStartsAt..]);
-                lastTerm = new Term(integerConstant);
+                lastTerm = new Polynomial(integerConstant);
                 restIndex = integerStartsAt;
             }
             else if (s[^1] == ')') // The term ends with a sub-term in parentheses, parse that
             {
                 int openingBracketIndex = FindMatchingOpeningBracket(s);
-                lastTerm = Term.Parse(s[(openingBracketIndex + 1)..^1]);
+                lastTerm = Polynomial.Parse(s[(openingBracketIndex + 1)..^1]);
                 restIndex = openingBracketIndex;
             }
             else // The term ends in a variable 'a' to 'z', parse that
             {
                 Variable variable = ParseVariable(s[^1]);
-                lastTerm = new Term(variable);
+                lastTerm = new Polynomial(variable);
                 restIndex = s.Length - 1;
             }
 
@@ -144,7 +144,7 @@
                 return lastTerm;
 
 
-            Term leftTerm = Term.Parse(s[..(restIndex - 1)]);
+            Polynomial leftTerm = Polynomial.Parse(s[..(restIndex - 1)]);
             char operation = s[restIndex - 1];
 
             // Recursively parse the rest of the term to the left, *then* apply the correct operation between both subterms
@@ -158,11 +158,11 @@
         }
 
         /// <summary>
-        /// Operator for addition of two terms. The coefficients of matching variable combinations are added.
+        /// Operator for addition of two polynomials. The coefficients of matching variable combinations are added.
         /// </summary>
-        public static Term operator +(Term first, Term second)
+        public static Polynomial operator +(Polynomial first, Polynomial second)
         {
-            var result = new Term();
+            var result = new Polynomial();
             foreach (VariableCombination varCombo in first.Coefficients.Keys.Union(second.Coefficients.Keys))
             {
                 int coefficient = first.Coefficients.GetValueOrDefault(varCombo)
@@ -179,11 +179,11 @@
         }
 
         /// <summary>
-        /// Operator for subtraction of two terms. The coefficients of matching variable combinations are subtracted.
+        /// Operator for subtraction of two polynomials. The coefficients of matching variable combinations are subtracted.
         /// </summary>
-        public static Term operator -(Term first, Term second)
+        public static Polynomial operator -(Polynomial first, Polynomial second)
         {
-            var result = new Term();
+            var result = new Polynomial();
             foreach (VariableCombination varCombo in first.Coefficients.Keys.Union(second.Coefficients.Keys))
             {
                 int coefficient = first.Coefficients.GetValueOrDefault(varCombo)
@@ -200,12 +200,12 @@
         }
 
         /// <summary>
-        /// Operator for multiplication of two terms. All variable combinations and corresponding coefficients are
+        /// Operator for multiplication of two polynomials. All variable combinations and corresponding coefficients are
         /// multiplied pairwise (i.e. (4a + 3b) * 2c = 8ac + 6bc)
         /// </summary>
-        public static Term operator *(Term first, Term second)
+        public static Polynomial operator *(Polynomial first, Polynomial second)
         {
-            var result = new Term();
+            var result = new Polynomial();
             foreach (VariableCombination varCombo1 in first.Coefficients.Keys)
             {
                 foreach (VariableCombination varCombo2 in second.Coefficients.Keys)
@@ -234,7 +234,7 @@
 
         /// <summary>
         /// Overloaded method to get hash code based solely on the content of the <see cref="Coefficients"/>,
-        /// since two <see cref="Term"/>s with matching <see cref="Coefficients"/> are considered equal.
+        /// since two <see cref="Polynomial"/>s with matching <see cref="Coefficients"/> are considered equal.
         /// </summary>
         public override int GetHashCode()
         {
@@ -249,12 +249,12 @@
         /// <summary>
         /// Overloaded equality check based solely on the content of the <see cref="Coefficients"/>.
         /// If all entries in the <see cref="Coefficients"/> dictionary match, 
-        /// the <see cref="Term"/>s are considered to be equal.
-        /// This is needed to use and compare them (Term a is equivalent to Term b iff a.Equals(b)).
+        /// the <see cref="Polynomial"/>s are considered to be equal.
+        /// This is needed to use and compare them (Polynomial a is equivalent to Polynomial b iff a.Equals(b)).
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj is not Term other) return false;
+            if (obj is not Polynomial other) return false;
             if (this.Coefficients.Count != other.Coefficients.Count) return false;
 
             var thisEnum = this.Coefficients.GetEnumerator();
