@@ -6,10 +6,10 @@
     public class Polynomial
     {
         /// <summary>
-        /// Maps all <see cref="VariableCombination"/>s in this polynomial to their coefficients
+        /// Maps all <see cref="VariableProduct"/>s in this polynomial to their coefficients
         /// (that is, the constant factor). Two polynomials are equivalent iff their <see cref="Coefficients"/> match.
         /// </summary>
-        private SortedDictionary<VariableCombination, int> Coefficients { get; }
+        private SortedDictionary<VariableProduct, int> Coefficients { get; }
 
         /// <summary>
         /// Parse the character <paramref name="c"/> between 'a' and 'z' to its
@@ -53,9 +53,9 @@
         /// </summary>
         private Polynomial(int constant = 0)
         {
-            Coefficients = new SortedDictionary<VariableCombination, int>();
+            Coefficients = new SortedDictionary<VariableProduct, int>();
             if (constant != 0)
-                Coefficients.Add(new VariableCombination(), constant);
+                Coefficients.Add(new VariableProduct(), constant);
         }
 
         /// <summary>
@@ -63,9 +63,9 @@
         /// </summary>
         private Polynomial(Variable variable)
         {
-            Coefficients = new SortedDictionary<VariableCombination, int>()
+            Coefficients = new SortedDictionary<VariableProduct, int>()
             {
-                { new VariableCombination(variable), 1 }
+                { new VariableProduct(variable), 1 }
             };
         }
 
@@ -158,12 +158,12 @@
         }
 
         /// <summary>
-        /// Operator for addition of two polynomials. The coefficients of matching variable combinations are added.
+        /// Operator for addition of two polynomials. The coefficients of matching variable products are added.
         /// </summary>
         public static Polynomial operator +(Polynomial first, Polynomial second)
         {
             var result = new Polynomial();
-            foreach (VariableCombination varCombo in first.Coefficients.Keys.Union(second.Coefficients.Keys))
+            foreach (VariableProduct varCombo in first.Coefficients.Keys.Union(second.Coefficients.Keys))
             {
                 int coefficient = first.Coefficients.GetValueOrDefault(varCombo)
                     + second.Coefficients.GetValueOrDefault(varCombo);
@@ -179,12 +179,12 @@
         }
 
         /// <summary>
-        /// Operator for subtraction of two polynomials. The coefficients of matching variable combinations are subtracted.
+        /// Operator for subtraction of two polynomials. The coefficients of matching variable products are subtracted.
         /// </summary>
         public static Polynomial operator -(Polynomial first, Polynomial second)
         {
             var result = new Polynomial();
-            foreach (VariableCombination varCombo in first.Coefficients.Keys.Union(second.Coefficients.Keys))
+            foreach (VariableProduct varCombo in first.Coefficients.Keys.Union(second.Coefficients.Keys))
             {
                 int coefficient = first.Coefficients.GetValueOrDefault(varCombo)
                     - second.Coefficients.GetValueOrDefault(varCombo);
@@ -200,17 +200,17 @@
         }
 
         /// <summary>
-        /// Operator for multiplication of two polynomials. All variable combinations and corresponding coefficients are
+        /// Operator for multiplication of two polynomials. All variable products and corresponding coefficients are
         /// multiplied pairwise (i.e. (4a + 3b) * 2c = 8ac + 6bc)
         /// </summary>
         public static Polynomial operator *(Polynomial first, Polynomial second)
         {
             var result = new Polynomial();
-            foreach (VariableCombination varCombo1 in first.Coefficients.Keys)
+            foreach (VariableProduct varCombo1 in first.Coefficients.Keys)
             {
-                foreach (VariableCombination varCombo2 in second.Coefficients.Keys)
+                foreach (VariableProduct varCombo2 in second.Coefficients.Keys)
                 {
-                    VariableCombination productVar = varCombo1 * varCombo2;
+                    VariableProduct productVar = varCombo1 * varCombo2;
 
                     if (result.Coefficients.ContainsKey(productVar))
                     {

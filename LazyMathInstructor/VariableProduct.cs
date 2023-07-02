@@ -2,29 +2,29 @@
 {
     /// <summary>
     /// Represents a product of 0 or more variables, each with an exponent.
-    /// For example one <see cref="VariableCombination"/> would be "a^3 b^4 c"
+    /// For example one <see cref="VariableProduct"/> would be "a^3 b^4 c"
     /// </summary>
-    public class VariableCombination : IComparable
+    public class VariableProduct : IComparable
     {
         /// <summary>
-        /// Maps all variables appearing in this variable combination to their respective exponents.
+        /// Maps all variables appearing in this variable product to their respective exponents.
         /// Variables with exponent 0 do not appear in the dictionary.
         /// </summary>
         public SortedDictionary<Variable, int> Exponents { get; }
 
         /// <summary>
-        /// Construct a <see cref="VariableCombination"/> with no variables.
+        /// Construct a <see cref="VariableProduct"/> with no variables.
         /// </summary>
-        public VariableCombination()
+        public VariableProduct()
         {
             Exponents = new SortedDictionary<Variable, int>();
         }
 
         /// <summary>
-        /// Construct a <see cref="VariableCombination"/> with one variable <paramref name="v"/>
+        /// Construct a <see cref="VariableProduct"/> with one variable <paramref name="v"/>
         /// that has an exponent of 1.
         /// </summary>
-        public VariableCombination(Variable v)
+        public VariableProduct(Variable v)
         {
             Exponents = new SortedDictionary<Variable, int>()
             {
@@ -33,22 +33,22 @@
         }
 
         /// <summary>
-        /// Construct a <see cref="VariableCombination"/> that copies the exponents from the
-        /// existing dictionary <paramref name="exponents"/> (of another <see cref="VariableCombination"/>).
+        /// Construct a <see cref="VariableProduct"/> that copies the exponents from the
+        /// existing dictionary <paramref name="exponents"/> (of another <see cref="VariableProduct"/>).
         /// </summary>
-        private VariableCombination(SortedDictionary<Variable, int> exponents)
+        private VariableProduct(SortedDictionary<Variable, int> exponents)
         {
             Exponents = new SortedDictionary<Variable, int>(exponents);
         }
 
         /// <summary>
-        /// Operator for multiplication of two variable combinations.
+        /// Operator for multiplication of two variable products.
         /// <paramref name="first"/> * <paramref name="second"/> is calculated by
-        /// adding the exponents of all variables in the combination (i.e. ab * b^2 = a b^3).
+        /// adding the exponents of all variables in the product (i.e. ab * b^2 = a b^3).
         /// </summary>
-        public static VariableCombination operator *(VariableCombination first, VariableCombination second)
+        public static VariableProduct operator *(VariableProduct first, VariableProduct second)
         {
-            var result = new VariableCombination(first.Exponents);
+            var result = new VariableProduct(first.Exponents);
             foreach (var x in second.Exponents)
             {
                 if (result.Exponents.ContainsKey(x.Key))
@@ -65,7 +65,7 @@
 
         /// <summary>
         /// Overloaded method to get hash code based solely on the content of the <see cref="Exponents"/>,
-        /// since two <see cref="VariableCombination"/>s with matching <see cref="Exponents"/> are considered equal.
+        /// since two <see cref="VariableProduct"/>s with matching <see cref="Exponents"/> are considered equal.
         /// </summary>
         public override int GetHashCode()
         {
@@ -80,12 +80,12 @@
         /// <summary>
         /// Overloaded equality check based solely on the content of the <see cref="Exponents"/>.
         /// If all entries in the <see cref="Exponents"/> dictionary match, 
-        /// the <see cref="VariableCombination"/>s are considered to be equal.
+        /// the <see cref="VariableProduct"/>s are considered to be equal.
         /// This is needed to use and compare them, e.g. as a key in Dictionaries.
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj is not VariableCombination other) return false;
+            if (obj is not VariableProduct other) return false;
             if (this.Exponents.Count != other.Exponents.Count) return false;
 
             var thisEnum = this.Exponents.GetEnumerator();
@@ -123,14 +123,14 @@
         }
 
         /// <summary>
-        /// Compares two <see cref="VariableCombination"/>s to establish an ordering. 
+        /// Compares two <see cref="VariableProduct"/>s to establish an ordering. 
         /// Earlier letters and higher exponents are ordered before later letters and smaller exponents:
         /// a^3 < a^2 < ab < b^2 < c
         /// </summary>
         public int CompareTo(object obj)
         {
-            if (obj is not VariableCombination other)
-                throw new ArgumentException("Can't compare variable combination to object of different type!");
+            if (obj is not VariableProduct other)
+                throw new ArgumentException("Can't compare variable product to object of different type!");
 
             for (Variable v = Variable.A; v <= Variable.Z; v++)
             {
