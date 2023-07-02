@@ -17,8 +17,8 @@ Program reads from STDIN:
 - 2`n` lines with a term each.
 
 Program writes to STDOUT:
-- `n` lines, reading
-  - `YES` if the `n`-th pair of terms are equivalent
+- `n` lines, where the `k`th line is
+  - `YES` if the `k`-th pair of terms are equivalent
   - `NO` if they aren't.
 
 Verbose mode can be enabled by passing `-v` as a command line argument, in which case the program will print each term after it was parsed, normalized and ordered deterministically.
