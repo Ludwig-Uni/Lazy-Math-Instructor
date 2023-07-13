@@ -276,7 +276,7 @@
         /// </summary>
         public override string ToString()
         {
-            return string.Join(" + ", Coefficients.Select(x => (x.Value == 1 ? "" : x.Value)
+            return string.Join(" + ", Coefficients.Select(x => (x.Value == 1 && x.Key.Exponents.Any() ? "" : x.Value)
                                                                    + x.Key.ToString()));
         }
     }
