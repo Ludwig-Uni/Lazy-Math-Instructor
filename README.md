@@ -17,6 +17,7 @@ This repository contains:
 - My [presentation slides](./Slides.pdf)
 - My [source code](./LazyMathInstructor) (split in several `.cs` files)
 - Several input examples: [Binomial formulas](./binomial_formulas.txt), [Examples from the problem description](./problem_examples.txt) and a [long term](./long_term.txt)
+- A [term generator](./TermGenerator/termgenerator.py) that can generate random terms of a desired length
 
 
 ## Usage of the program
@@ -34,3 +35,13 @@ Program writes to STDOUT:
 
 Verbose mode can be enabled by passing `-v` as a command line argument, in which case the program will print each addition, 
 subtraction and multiplication operation it performs, as well as each term after it was parsed, normalized and ordered deterministically.
+
+
+## Usage of the term generator:
+
+Calling the script without any arguments, it generates `N = 20` random terms of approximately `LENGTH = 250` characters.
+
+`N` and `LENGTH` can be passed as command line arguments to adjust the output.
+`N` must be an even number because the Lazy Math Instructor program can only work with *pairs* of terms.
+
+The script's STDOUT can be used as STDIN for the main program for benchmarking.
