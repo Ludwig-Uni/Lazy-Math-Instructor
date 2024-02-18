@@ -15,6 +15,7 @@ They are evaluated from left to right with equal operator precedence for all ope
 This repository contains:
 - The [problem description](./Lazy-Math-Instructor.pdf)
 - My [presentation slides](./Slides.pdf)
+- My [submitted paper](./LazyMathInstructor_Paper.pdf)
 - My [source code](./LazyMathInstructor) (split in several `.cs` files)
 - Several input examples: [Binomial formulas](./binomial_formulas.txt), [Examples from the problem description](./problem_examples.txt) and a [long term](./long_term.txt)
 - A [term generator](./TermGenerator/termgenerator.py) that can generate random terms of a desired length
